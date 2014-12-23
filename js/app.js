@@ -1,9 +1,13 @@
 
 // DOM manipulation
 
-// document.addEventListener("DOMContentLoaded", function() {
-// 	$("#selectFile").addEventListener("change", angular.element(this).scope().addVideoToQueue(this));
-// });
+document.addEventListener("DOMContentLoaded", function() {
+	$("#selectFile").addEventListener("change", addVideoToQueue());
+});
+
+function addVideoToQueue() {
+	console.log("it worked")
+}
 
 
 // constants

@@ -19,3 +19,12 @@
 
 <--TUTORIALS-->
 	mattfuller			blog.matthewdfuller.com/2014/05/chromecast-development-tutorial-your.html
+
+<--ASSORTED-->
+	access angular from outside	JS
+						http://stackoverflow.com/questions/14298361/access-angular-objects-function-from-outside-js
+
+	ng-change			https://docs.angularjs.org/api/ng/directive/ngChange
+	addEventListener	http://stackoverflow.com/questions/24875414/addeventlistener-change-and-option-selection
+	using onClick with a chrome extension
+						http://stackoverflow.com/questions/13591983/onclick-within-chrome-extension-not-working
