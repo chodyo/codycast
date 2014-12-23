@@ -1,4 +1,11 @@
 
+// DOM manipulation
+
+// document.addEventListener("DOMContentLoaded", function() {
+// 	$("#selectFile").addEventListener("change", angular.element(this).scope().addVideoToQueue(this));
+// });
+
+
 // constants
 
 var DEVICE_STATE = {
@@ -65,8 +72,6 @@ angular.module('codycast', [
 		// console.log(name);
 
 		this.initializeCast();
-
-		// this.cast.session.media.push(name);
 	};
 
 
@@ -109,72 +114,12 @@ angular.module('codycast', [
 		}
 	};
 
-	// TODO
 	$scope.onInitSuccess = function(e) {
 		console.log("init success");
 	};
 
-	// TODO
 	$scope.onError = function(e) {
 		console.log("error: " + e.code);
 	};
-
-
-
-
-
-/*
-
-
-
-	// the google example app loads in a bunch of media from a file
-	// this method scans the file to see which movie we're on
-	// i don't need it because i don't intend on doing it that way
-	// $scope.syncCurrentMedia = function(curerntMediaURL) {
-
-	// }
-
-	$scope.sessionUpdateListener = function(isAlive) {
-		if (!isAlive) {
-			this.cast.session = null;
-			this.cast.deviceState = DEVICE_STATE.IDLE;
-			this.cast.playerState = PLAYER_STATE.IDLE;
-			this.currentMediaSession = null;
-			clearInterval(this.cast.timer);
-			this.updateDisplayMessage();
-		}
-	}
-
-	$scope.updateDisplayMessage = function() {
-		if (this.cast.deviceState != DEVICE_STATE.ACTIVE || this.cast.playerState == PLAYER_STATE.IDLE || this.cast.playerState == PLAYER_STATE.STOPPED) {
-			this.pageState.title = "CODYCAST";
-			this.pageState.device = "";
-		}
-		else {
-			this.pageState.title = this.cast.mediaContents[this.cast.currentMediaIndex]['title'];
-			this.pageState.device = this.cast.playerState + " on " + this.cast.session.receiver.friendlyName;
-		}
-	}
-
-	// TODO
-	$scope.discoverDevices = function() {
-		console.log("discovering devices");
-
-		$scope.requestSession();
-	};
-
-	// TODO
-	$scope.requestSession = function() {
-		console.log("requesting session");
-		chrome.cast.requestSession($scope.onRequestSessionSuccess, $scope.onLaunchError);
-	};
-
-	// TODO
-	$scope.onRequestSessionSuccess = function(e) {
-		console.log("session request success");
-		$scope.cast.session = e;
-	};
-
-	*/
 
 });

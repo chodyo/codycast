@@ -6,6 +6,11 @@
 	relevant app 		github.com/googlecast/CastVideos-chrome
 	stack overflow		#google-cast
 
+<--CHROME EXTENSION-->
+	official			developer.chrome.com/extensions/getstarted
+	angularjs			developer.chrome.com/apps/angular_framework
+	walkthrough			ng-newsletter.com/posts/chrome-apps-on-angular.html
+
 <--LIBRARIES-->
 	angular				"https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"
 	jquery				"http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"

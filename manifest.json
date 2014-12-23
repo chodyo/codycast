@@ -1,0 +1,20 @@
+{
+	"manifest_version": 2,
+	"name": "codycast",
+	"description": "Streams local video to a Chromecast.",
+	"version": "0.0.1",
+
+	"permissions": [
+		"http://www.gstatic.com/cv/js/sender/v1/cast_sender.js",
+		"tabs"
+	],
+	"background": {
+		"scripts": ["js/background.js"],
+		"persistent": false
+	},
+	"content_security_policy": "script-src 'self'; object-src 'self'",
+	"browser_action": {
+		"default_icon": "images/icon.png",
+		"default_page": "main.html"
+	}
+}
