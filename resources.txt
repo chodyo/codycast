@@ -1,0 +1,16 @@
+<--CHROMECAST-->
+	official			developers.google.com/cast
+	chrome api			developers.google.com/cast/docs/reference/chrome
+	design checklist	developers.google.com/cast/docs/design_checklist
+	sample apps			github.com/googlecast
+	relevant app 		github.com/googlecast/CastVideos-chrome
+	stack overflow		#google-cast
+
+<--LIBRARIES-->
+	angular				"https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"
+	jquery				"http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
+	bootstrap			"http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
+						"http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
+
+<--TUTORIALS-->
+	mattfuller			blog.matthewdfuller.com/2014/05/chromecast-development-tutorial-your.html

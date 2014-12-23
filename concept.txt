@@ -1,0 +1,126 @@
+Extension Data Structures
+
+-------------------------------------------------------------------------------
+
+CHROME
+source = youtube("DevBytes: Google Cast for Chrome")
+
+LIFECYCLE
+	1. Load Sender App
+	2. Initialize API
+	3. Discover Devices**
+	4. Request Session
+	5. Send & Receive Messages
+	6. Disconnect from Device
+
+CHROME SENDER APPS
+	- Constructed using HTML5, JS, CSS
+	- Include //www.gstatic.com/cv/js/sender/v1/cast_sender.js
+	- Wait for window.onLoad (may need to setup a retry timeout to detect the cast APIs)
+		window.onload = function() {
+			if (chrome.cast || chrome.cast.isAvailable) {
+				// ... API Initialization
+			}
+		}
+	- Detect Cast API
+
+SENDER API INITIALIZATION
+	var sessionRequest = new chrome.cast.SessionRequest(appId);
+	var apiConfig = new chrome.cast.ApiConfig(sessionRequest, sessionJoinedListener, receiverListener);
+	chrome.cast.initialize(apiConfig, onInitSuccess, onInitError);
+
+DEVICE DISCOVERY
+	function receiverListener(receivers) {
+		if ('available' === receivers) {
+			...
+		}
+	}
+
+LAUNCH RECEIVERS
+	chrome.cast.requestSession(
+		function(session) {
+			// decorate the session with listeners
+			session.addUpdateListener(
+				sessionUpdateListener);
+		},
+		function(castError) {
+			// Error case
+		}
+	)
+
+MESSAGE EXCHANGE
+	var mediaInfo = new chrome.cast.media.MediaInfo(url, mime);
+	var loadRequest = new chrome.cast.media.LoadRequest(mediaInfo);
+	session.loadMedia(loadRequest, onSuccess, onError);
+
+DISCONNECTING
+	1. when a session is first established, the session app is passed a session object
+	2. adding an update listener to the session object allows the sender app to know when a session has ended
+	3. the session listener function is passed a boolean value - if false, there is no connection
+	4. when user initiates a disconnect, triggers a session update listener when the session is torn down
+
+
+-------------------------------------------------------------------------------
+
+
+ANDROID (not planned)
+source = youtube("DevBytes: Google Cast SDK for Android")
+
+LIFECYCLE of SENDER
+	1. Launch Sender App
+	2. Initialize API
+	3. Discover Devices
+	4. Connect to Selected Device
+	5. Launch Receiver App
+	6. Send & Receive Messages
+	7. Disconnect from Device
+
+STEPS of SUPPORTING CAST
+	1. Add Cast Button
+		a. MediaRouter ActionBar provider 	<-- recommended, easiest
+		b. MediaRouter Button
+		c. custom button
+	2. Create a MediaRouter Selector
+		- only devices that can run my app
+	3. Selector is attached to the button when the activity starts
+	4. Tell the MediaRouter to start discovery of devices when the activity starts
+		- remove the callback when discovery is no longer needed to conserve battery usage
+			example:
+			protected void onResume() {
+				super.onResume();
+				mMediaRouter.addCallback(mMediaRouteSelector,
+					mMediaRouterCallback,
+					MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
+			}
+			private class MyMediaRouterCallback extends MediaRouter.Callback {
+				public void onRouteSelected(MediaRouter router, RouteInfo info) {
+					mSelectedDevice = CastDevice.getFromBundle(info.getExtras());
+				}
+			}
+	5. Launch Receiver App
+		a. Sender app needs to connect to Google Play services using GoogleApiClient class
+		b. Use Cast.CastApi to launch receiver application using the app ID obtained from the developer console
+			example:
+			private class ConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
+				@Override
+				public void onConnected(Bundle connectionHint) {
+					Cast.CastApi.launchApplication(mApiClient, "YOUR_APPLICATION_ID", false)
+						.setResultCallback(mApplicationConnectionResultCallback);
+				}
+			}
+		c. Once it's launched, the sender can create a media message channel or optional custom message channels to the receiver
+			- the app has to handle various callbacks about the application and the channel status
+	6. Play Media
+		a. Create a MediaInfo instance with the URL of the media stream
+		b. RemoteMediaPlayer class is used to load that media stream on the receiver
+		c. Sender app evokes commands such as play or pause using the RemoteMediaPlayer
+		d. The sender app needs to handle callbacks about the media status during playback
+			MediaInfo example:
+			MediaInfo mediaInfo = new MediaInfo.Builder(
+				"http://your.server.com/vido.mp4")
+				.setContentType("video/mp4")
+				.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+					.build();
+
+			mRemoteMediaPlayer.load(mApiClient, mediaInfo, true)
+				.setResultCallback(mCustomResultCallback);
