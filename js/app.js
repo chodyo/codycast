@@ -97,7 +97,7 @@ angular.module('codycast', [
 
 	$scope.launchApp = function() {
 		console.log("Launching the Chromecast App...");
-		chrome.cast.requestSession(onRequestSessionSuccess, onLaunchError);
+		chrome.cast.requestSession($scope.onRequestSessionSuccess, $scope.onLaunchError);
 	}
 
 	$scope.initializeCastApi = function() {   
@@ -111,15 +111,13 @@ angular.module('codycast', [
 												$scope.sessionListener, 
 												$scope.receiverListener);
 		chrome.cast.initialize(apiConfig, $scope.onInitSuccess, $scope.onError);
-		
-		// can do UI stuff here
 	};
 
 	$scope.sessionListener = function(e) {
 		console.log("New session.");
 
-		this.cast.session = e;
-		if (session.media.length != 0) {
+		$scope.cast.session = e;
+		if ($scope.cast.session.media.length != 0) {
 			console.log("Found " + $scope.session.media.length + "sessions.");
 		}
 	};
@@ -141,13 +139,40 @@ angular.module('codycast', [
 		console.log("error: " + e.code);
 	};
 
-	function onRequestSessionSuccess(e) {
+	$scope.onRequestSessionSuccess = function(e) {
         console.log("Successfully created session: " + e.sessionId);
         $scope.cast.session = e;
+        $scope.loadMedia();
+	};
+
+	$scope.onLaunchError = function(e) {
+        console.log("Error connecting to the Chromecast.");
+	};
+
+	
+	// media stuff
+	$scope.loadMedia = function() {
+		if (!$scope.cast.session) {
+			console.log("No session.");
+			return;
+		}
+
+		var mediaInfo = new chrome.cast.media.MediaInfo('http://i.imgur.com/IFD14.jpg');
+		mediaInfo.contentType = 'image/jpg';
+
+		var request = new chrome.cast.media.LoadRequest(mediaInfo);
+		request.autoplay = true;
+
+		$scope.cast.session.loadMedia(request, $scope.onLoadSuccess, $scope.onLoadError);
 	}
 
-	function onLaunchError() {
-        console.log("Error connecting to the Chromecast.");
+	$scope.onLoadSuccess = function() {
+		console.log("Successfully loaded image.");
 	}
+
+	$scope.onLoadError = function() {
+		console.log("Failed to send media to Chromecast.");
+	}
+
 
 });
