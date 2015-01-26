@@ -1,13 +1,18 @@
 
-// DOM manipulation
+// get cast set up in the background once the page has loaded
+$(document).ready(function(){
+	var loadCastInterval = setInterval(function(){
+        if (chrome.cast.isAvailable) {
+            console.log('Cast has loaded.');
+            clearInterval(loadCastInterval);
+            angular.element($('#controller')).scope().initializeCastApi();
+        } 
+        else {
+            console.log('Unavailable');
+        }
+	}, 1000);
+});
 
-// document.addEventListener("DOMContentLoaded", function() {
-// 	$("#selectFile").addEventListener("change", addVideoToQueue());
-// });
-
-// function addVideoToQueue() {
-// 	console.log("it worked")
-// }
 
 
 // constants
@@ -75,7 +80,7 @@ angular.module('codycast', [
 
 	$scope.handleSelectedVideo = function(element) {
 		this.addVideoToQueue(element);
-		this.initializeCast();
+		this.launchApp();
 	}
 
 	$scope.addVideoToQueue = function(element) {
@@ -90,12 +95,12 @@ angular.module('codycast', [
 
 	// cast functions
 
-	$scope.initializeCast = function() {
-		if (!chrome.cast || !chrome.cast.isAvailable) {
-			console.log("No Chromecast detected, setting timeout");
-			setTimeout($scope.initializeCast.bind(this), 1000);
-			return;
-		}
+	$scope.launchApp = function() {
+		console.log("Launching the Chromecast App...");
+		chrome.cast.requestSession(onRequestSessionSuccess, onLaunchError);
+	}
+
+	$scope.initializeCastApi = function() {   
 
 		console.log("initializing Cast API");
 
@@ -135,5 +140,14 @@ angular.module('codycast', [
 	$scope.onError = function(e) {
 		console.log("error: " + e.code);
 	};
+
+	function onRequestSessionSuccess(e) {
+        console.log("Successfully created session: " + e.sessionId);
+        $scope.cast.session = e;
+	}
+
+	function onLaunchError() {
+        console.log("Error connecting to the Chromecast.");
+	}
 
 });
