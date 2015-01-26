@@ -21,20 +21,15 @@
 		</div>
 		<br /><br />
 
-		<div id="select">
-			<div ng-if='!state.selected'>
-				<!-- <input id="selectFile" type="file" accept="video/*" ng-if="!state.selected" ng-model="selectedVideo" onchange="angular.element(this).scope().addVideoToQueue(this)" /> -->
-				<input id="selectFile" type="file" accept="video/*" ng-if="!state.selected" ng-model="selectedVideo" />
-			</div>
+		<div id="select" ng-if='!pageState.selected'>
+			<input id="selectFile" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().handleSelectedVideo(this)" />
 		</div>
 		<br /><br />
 
-		<div id="playback">playback</div>
+		<div id="playback" ng-if='pageState.selected'>playback controls</div>
 		<br /><br />
 
-		<div id="queue">
-			<div ng-if='state.selected'>queue</div>
-		</div>
+		<div id="queue" ng-if='pageState.queueOpen'>queue</div>
 
 </body>
 </html>

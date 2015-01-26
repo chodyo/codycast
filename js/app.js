@@ -1,13 +1,13 @@
 
 // DOM manipulation
 
-document.addEventListener("DOMContentLoaded", function() {
-	$("#selectFile").addEventListener("change", addVideoToQueue());
-});
+// document.addEventListener("DOMContentLoaded", function() {
+// 	$("#selectFile").addEventListener("change", addVideoToQueue());
+// });
 
-function addVideoToQueue() {
-	console.log("it worked")
-}
+// function addVideoToQueue() {
+// 	console.log("it worked")
+// }
 
 
 // constants
@@ -47,7 +47,9 @@ angular.module('codycast', [
 		device: ""
 	};
 
-	$scope.selectedVideo = "";
+	$scope.queue = {
+		files: []
+	}
 
 	$scope.cast = {
 		// boolean
@@ -71,21 +73,29 @@ angular.module('codycast', [
 
 	// page functions
 
-	$scope.addVideoToQueue = function(element, scope) {
-		var name = element.files[0];
-		// console.log(name);
-
+	$scope.handleSelectedVideo = function(element) {
+		this.addVideoToQueue(element);
 		this.initializeCast();
+	}
+
+	$scope.addVideoToQueue = function(element) {
+		var movie = element.files[0];
+		$scope.pageState.selected = true;
+		$scope.pageState.title = movie.name.split(".mp4")[0];
+		$scope.queue.files.push(movie);
+		$scope.$apply();
+		console.log(movie);
 	};
 
 
 	// cast functions
 
 	$scope.initializeCast = function() {
-		// if (!chrome.cast || !chrome.cast.isAvailable) {
-		// 	setTimeout($scope.initializeCast.bind(this), 1000);
-		// 	return;
-		// }
+		if (!chrome.cast || !chrome.cast.isAvailable) {
+			console.log("No Chromecast detected, setting timeout");
+			setTimeout($scope.initializeCast.bind(this), 1000);
+			return;
+		}
 
 		console.log("initializing Cast API");
 
