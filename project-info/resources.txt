@@ -28,3 +28,9 @@
 	addEventListener	http://stackoverflow.com/questions/24875414/addeventlistener-change-and-option-selection
 	using onClick with a chrome extension
 						http://stackoverflow.com/questions/13591983/onclick-within-chrome-extension-not-working
+						
+<--EXAMPLES-->
+	stream local media		https://github.com/abid-mujtaba/local-chromecast
+					https://github.com/entertailion/Caster
+					https://github.com/mustafaakin/cast-localvideo
+					https://github.com/googlecast/CastMediaPlayerStreamingDRM
