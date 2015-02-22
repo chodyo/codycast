@@ -1,5 +1,5 @@
 chrome.browserAction.onClicked.addListener(function(activeTab)
 {
-    var newURL = "main.html";
+    var newURL = "index.html";
     chrome.tabs.create({ url: newURL });
 });

@@ -174,5 +174,4 @@ angular.module('codycast', [
 		console.log("Failed to send media to Chromecast.");
 	}
 
-
 });

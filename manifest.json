@@ -15,6 +15,6 @@
 	"content_security_policy": "script-src 'self'; object-src 'self'",
 	"browser_action": {
 		"default_icon": "images/icon.png",
-		"default_page": "main.html"
+		"default_page": "index.html"
 	}
 }
