@@ -36,3 +36,4 @@
 					https://github.com/entertailion/Caster
 					https://github.com/mustafaakin/cast-localvideo
 					https://github.com/googlecast/CastMediaPlayerStreamingDRM
+					http://www.reddit.com/r/Chromecast/comments/1xgte4/open_source_local_media_server_for_chromecast/
