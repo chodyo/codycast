@@ -32,7 +32,7 @@
 <--EXAMPLES-->
 	stream local media		
 					https://github.com/pjjanak/chromecast-hello-world
-					https://github.com/abid-mujtaba/local-chromecast
+				https://github.com/abid-mujtaba/local-chromecast
 					https://github.com/entertailion/Caster
 					https://github.com/mustafaakin/cast-localvideo
 					https://github.com/googlecast/CastMediaPlayerStreamingDRM
