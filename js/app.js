@@ -25,14 +25,14 @@ var DEVICE_STATE = {
 };
 
 var PLAYER_STATE = {
-	"IDLE" : "IDLE", 
-	"LOADING" : "LOADING", 
-	"LOADED" : "LOADED", 
-	"PLAYING" : "PLAYING",
-	"PAUSED" : "PAUSED",
-	"STOPPED" : "STOPPED",
-	"SEEKING" : "SEEKING",
-	"ERROR" : "ERROR"
+	"IDLE" 		: "IDLE", 
+	"LOADING" 	: "LOADING", 
+	"LOADED" 	: "LOADED", 
+	"PLAYING" 	: "PLAYING",
+	"PAUSED" 	: "PAUSED",
+	"STOPPED" 	: "STOPPED",
+	"SEEKING" 	: "SEEKING",
+	"ERROR" 	: "ERROR"
 };
 
 
@@ -157,8 +157,8 @@ angular.module('codycast', [
 			return;
 		}
 
-		var mediaInfo = new chrome.cast.media.MediaInfo('http://i.imgur.com/IFD14.jpg');
-		mediaInfo.contentType = 'image/jpg';
+		var mediaInfo = new chrome.cast.media.MediaInfo('http://192.168.1.7:3000/codycast/media/small.mp4');
+		mediaInfo.contentType = 'video/mp4';
 
 		var request = new chrome.cast.media.LoadRequest(mediaInfo);
 		request.autoplay = true;
@@ -167,11 +167,12 @@ angular.module('codycast', [
 	}
 
 	$scope.onLoadSuccess = function() {
-		console.log("Successfully loaded image.");
+		console.log("Successfully loaded video.");
 	}
 
-	$scope.onLoadError = function() {
+	$scope.onLoadError = function(e) {
 		console.log("Failed to send media to Chromecast.");
+		console.log(e);
 	}
 
 });
