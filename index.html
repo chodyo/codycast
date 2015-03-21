@@ -28,13 +28,23 @@
 		</div>
 		<br /><br />
 
-		<div id="playback" ng-if='pageState.selected'>playback controls</div>
+		<div id="playback" ng-if='pageState.selected'>
+			PLAYBACK CONTROLS
+			<div id="back30">back30</div>
+			<div id="playPause" ng-click="playPause()">
+				<div ng-if='cast.playerState != "PLAYING"'>play</div>
+				<div ng-if='cast.playerState === "PLAYING"'>pause</div>
+			</div>
+			<div id="stop" ng-click="stop()">stop</div>
+			<div id="forward30">forward30</div>
+		</div>
 		<br /><br />
 
 		<div id="queue">
 			QUEUE
 			<div id="queueItem" ng-repeat='video in queue.files'>
-				{{video.title}}
+				<!-- <div id="removeQueueItem" style="width:50px;height:50px;background-color:red;" ng-click="removeQueueItem(video.index)"></div> -->
+				{{video.index+1}}) {{video.title}}
 			</div>
 		</div>
 
