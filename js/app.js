@@ -1,6 +1,8 @@
 
 // get cast set up in the background once the page has loaded
 $(document).ready(function(){
+	angular.element($('#controller')).scope().setBaseURL(document.URL);
+
 	var loadCastInterval = setInterval(function(){
         if (chrome.cast.isAvailable) {
             console.log('Cast has loaded.');
@@ -43,11 +45,10 @@ angular.module('codycast', [
 ])
 .controller('pageController', function($scope) {
 
-	// variables
+// variables
 
 	$scope.pageState = {
 		selected: false,
-		queueOpen: true,
 		title: "CODYCAST",
 		device: ""
 	};
@@ -60,6 +61,10 @@ angular.module('codycast', [
 		// boolean
 		receivers_available: false,
 
+		// 
+		baseURL: "",
+		currentURL: "",
+
 		// the chrome.cast.Session object
 		session: null,
 		// the state of the device
@@ -67,7 +72,7 @@ angular.module('codycast', [
 		// the state of the player
 		playerState: PLAYER_STATE.IDLE,
 
-		// 
+		// which video in my queue is being played
 		currentMediaIndex: -1,
 		// a chrome.cast.media.Media ojbect
 		currentMediaSession: null,
@@ -76,24 +81,34 @@ angular.module('codycast', [
 	};
 
 
-	// page functions
+// page functions
 
-	$scope.handleSelectedVideo = function(element) {
-		this.addVideoToQueue(element);
+	$scope.setBaseURL = function(url) {
+		$scope.cast.baseURL = url + "media/";
+		console.log("Set base url to: " + $scope.cast.baseURL);
+	}
+
+	$scope.handlePlayVideo = function(element) {
+		var video = element.files[0];
+		$scope.pageState.selected = true;
+		$scope.pageState.title = video.name.split(".mp4")[0];
+		$scope.cast.currentURL = $scope.cast.baseURL + video.name;
+		console.log("Playing video: " + video);
+
+		this.handleQueueVideo(video);
+
+		$scope.$apply();
+
 		this.launchApp();
 	}
 
-	$scope.addVideoToQueue = function(element) {
-		var movie = element.files[0];
-		$scope.pageState.selected = true;
-		$scope.pageState.title = movie.name.split(".mp4")[0];
-		$scope.queue.files.push(movie);
+	$scope.handleQueueVideo = function(t) {
+		$scope.queue.files.push({title: t});
 		$scope.$apply();
-		console.log(movie);
 	};
 
 
-	// cast functions
+// cast functions
 
 	$scope.launchApp = function() {
 		console.log("Launching the Chromecast App...");
@@ -114,11 +129,25 @@ angular.module('codycast', [
 	};
 
 	$scope.sessionListener = function(e) {
-		console.log("New session.");
+		console.log("Setting up session.");
 
 		$scope.cast.session = e;
 		if ($scope.cast.session.media.length != 0) {
-			console.log("Found " + $scope.session.media.length + "sessions.");
+			$scope.pageState.selected = true;
+			for (m in $scope.cast.session.media) {
+				// add chromecast queued videos to angular queue
+				var video = $scope.cast.session.media[m];
+				$scope.handleQueueVideo(video.media.contentId.replace($scope.cast.baseURL, ""));
+				if ($scope.isCurrentVideo(video.playerState)) {
+					// this is the one that's currently playing
+					$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
+				}
+			}
+
+			var text = "Found " + $scope.cast.session.media.length + $scope.plurality($scope.cast.session.media.length, " video.", " videos.");
+			console.log(text);
+
+			$scope.$apply();
 		}
 	};
 
@@ -150,14 +179,16 @@ angular.module('codycast', [
 	};
 
 	
-	// media stuff
+// media stuff
+
 	$scope.loadMedia = function() {
 		if (!$scope.cast.session) {
 			console.log("No session.");
 			return;
 		}
 
-		var mediaInfo = new chrome.cast.media.MediaInfo('http://192.168.1.7:3000/codycast/media/small.mp4');
+		console.log("Playing video from url: " + $scope.cast.currentURL);
+		var mediaInfo = new chrome.cast.media.MediaInfo($scope.cast.currentURL);
 		mediaInfo.contentType = 'video/mp4';
 
 		var request = new chrome.cast.media.LoadRequest(mediaInfo);
@@ -171,8 +202,39 @@ angular.module('codycast', [
 	}
 
 	$scope.onLoadError = function(e) {
+		$scope.pageState.selected = false;
+		$scope.pageState.title = "CODYCAST";
+		$scope.$apply();
+
 		console.log("Failed to send media to Chromecast.");
 		console.log(e);
+		alert("The Chromecast couldn't find the video you wanted to play!\n\nBe sure to select a file from the {server}/codycast/media directory!");
+	}
+
+
+// util functions
+
+	$scope.plurality = function(count, singular, plural) {
+		return (count == 1) ? singular : plural ;
+	}
+
+	$scope.isCurrentVideo = function(state) {
+		switch(state) {
+			case PLAYER_STATE.PLAYING:
+				return true;
+			case PLAYER_STATE.PAUSED:
+				return true;
+			case PLAYER_STATE.SEEKING:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	$scope.getTitleFromURL = function(URL) {
+		var title = $scope.cast.session.media[m].media.contentId.split("/");
+		title = title[title.length-1].split(".mp4")[0];
+		return title;
 	}
 
 });

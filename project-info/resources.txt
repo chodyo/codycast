@@ -23,7 +23,6 @@
 <--ASSORTED-->
 	access angular from outside	JS
 						http://stackoverflow.com/questions/14298361/access-angular-objects-function-from-outside-js
-
 	ng-change			https://docs.angularjs.org/api/ng/directive/ngChange
 	addEventListener	http://stackoverflow.com/questions/24875414/addeventlistener-change-and-option-selection
 	using onClick with a chrome extension
@@ -31,9 +30,12 @@
 						
 <--EXAMPLES-->
 	stream local media		
-					https://github.com/pjjanak/chromecast-hello-world
-				https://github.com/abid-mujtaba/local-chromecast
-					https://github.com/entertailion/Caster
-					https://github.com/mustafaakin/cast-localvideo
-					https://github.com/googlecast/CastMediaPlayerStreamingDRM
-					http://www.reddit.com/r/Chromecast/comments/1xgte4/open_source_local_media_server_for_chromecast/
+						https://github.com/pjjanak/chromecast-hello-world
+						https://github.com/abid-mujtaba/local-chromecast
+						https://github.com/entertailion/Caster
+						https://github.com/mustafaakin/cast-localvideo
+						https://github.com/googlecast/CastMediaPlayerStreamingDRM
+						http://www.reddit.com/r/Chromecast/comments/1xgte4/open_source_local_media_server_for_chromecast/
+
+<--FFMPEG IN JS-->
+	!!!					http://bgrins.github.io/videoconverter.js/

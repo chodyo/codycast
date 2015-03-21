@@ -24,14 +24,19 @@
 		<br /><br />
 
 		<div id="select" ng-if='!pageState.selected'>
-			<input id="selectFile" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().handleSelectedVideo(this)" />
+			<input id="selectFile" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().handlePlayVideo(this)" />
 		</div>
 		<br /><br />
 
 		<div id="playback" ng-if='pageState.selected'>playback controls</div>
 		<br /><br />
 
-		<div id="queue" ng-if='pageState.queueOpen'>queue</div>
+		<div id="queue">
+			QUEUE
+			<div id="queueItem" ng-repeat='video in queue.files'>
+				
+			</div>
+		</div>
 
 </body>
 </html>
