@@ -95,7 +95,7 @@ angular.module('codycast', [
 		$scope.cast.currentURL = $scope.cast.baseURL + video.name;
 		console.log("Playing video: " + video);
 
-		this.handleQueueVideo(video);
+		this.handleQueueVideo(video.name);
 
 		$scope.$apply();
 
@@ -103,7 +103,7 @@ angular.module('codycast', [
 	}
 
 	$scope.handleQueueVideo = function(t) {
-		$scope.queue.files.push({title: t});
+		$scope.queue.files.push({title: t.split(".mp4")[0]});
 		$scope.$apply();
 	};
 
