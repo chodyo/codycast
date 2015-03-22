@@ -15,6 +15,11 @@ $(document).ready(function(){
 	}, 1000);
 });
 
+$(document).on("click", ".select", function() {
+	var file = $(this).parent().parent().find(".file");
+	file.trigger("click");
+});
+
 
 
 // constants
@@ -48,7 +53,8 @@ angular.module('codycast', [
 		device: "",
 		isSeeking: false,
 		currentTime: null,
-		isCounting: false
+		isCounting: false,
+		customTime: null
 	};
 
 	$scope.queue = {
@@ -248,7 +254,7 @@ angular.module('codycast', [
 		// $scope.cast.playerState = PLAYER_STATE.PLAYING;
 		// $scope.pageState.currentTime = 0.00001;
 		// $scope.$apply();
-		
+
 		// don't need this - chromecast auto updates when a new video begins playing
 		// $scope.timerInterval();
 
@@ -339,7 +345,7 @@ angular.module('codycast', [
 				var currentTime = $scope.pageState.currentTime;
 				var newTime = currentTime + sec;
 				var maxTime = video.media.duration;
-				newTime = ( (maxTime <= newTime) ? maxTime : newTime );
+				newTime = ( (maxTime < newTime) ? maxTime : newTime );
 
 				var seekRequest = new chrome.cast.media.SeekRequest();
 				seekRequest.currentTime = newTime;
@@ -372,8 +378,23 @@ angular.module('codycast', [
 	}
 
 	$scope.seekMedia = function() {
-debugger;
+// debugger;
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			if ($scope.isCurrentVideo(video.playerState)) {
+				var newTime = parseInt($scope.pageState.customTime);
+				var maxTime = video.media.duration;
+				newTime = ( (maxTime < newTime) ? maxTime : newTime );
 
+				var seekRequest = new chrome.cast.media.SeekRequest();
+				seekRequest.currentTime = newTime;
+				video.seek(seekRequest,
+					$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
+					$scope.onInteractionError);
+
+				break;
+			}
+		}
 	}
 
 	$scope.disconnect = function() {

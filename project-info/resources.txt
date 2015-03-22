@@ -39,3 +39,9 @@
 
 <--FFMPEG IN JS-->
 	!!!					http://bgrins.github.io/videoconverter.js/
+
+
+<--NIFTY CONSOLE COMMANDS-->
+	scope				angular.element($('#controller')).scope();
+						angular.element($('#controller')).scope().pageState.selected = false;
+						angular.element($('#controller')).scope().$apply();
