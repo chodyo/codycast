@@ -20,6 +20,7 @@
 
 		<div id="title">
 			<h1>{{pageState.title}}</h1>
+			<h2 ng-if='pageState.device !== ""'>On {{pageState.device}}</h2>
 		</div>
 		<br /><br />
 
@@ -28,15 +29,21 @@
 		</div>
 		<br /><br />
 
-		<div id="playback" ng-if='pageState.selected'>
-			PLAYBACK CONTROLS
-			<div id="back30">back30</div>
-			<div id="playPause" ng-click="playPause()">
+		<div id="playback">
+			<h4>STATUS</h4>
+			<div id="currentTime" ng-if='pageState.currentTime'>{{humanReadableTime(pageState.currentTime)}}</div>
+			<div id="currentStatus">{{cast.playerState}}</div>
+			<br>
+			<h4>BUTTONS</h4>
+			<div id="back30" ng-if='pageState.selected' ng-click="jumpBack(30)">back30</div>
+			<div id="playPause" ng-if='pageState.selected' ng-click="playPause()">
 				<div ng-if='cast.playerState != "PLAYING"'>play</div>
 				<div ng-if='cast.playerState === "PLAYING"'>pause</div>
 			</div>
-			<div id="stop" ng-click="stop()">stop</div>
-			<div id="forward30">forward30</div>
+			<!-- <div id="stop" ng-click="stop()" ng-if='pageState.selected'>stop</div> -->
+			<div id="forward30" ng-if='pageState.selected' ng-click="jumpForward(30)">forward30</div>
+			<div id="disconnect" ng-if='pageState.device != ""' ng-click="disconnect()">disconnect</div>
+			<div id="volume"></div>
 		</div>
 		<br /><br />
 

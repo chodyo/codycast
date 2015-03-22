@@ -19,24 +19,19 @@ $(document).ready(function(){
 
 // constants
 
-var DEVICE_STATE = {
-	"IDLE": 	0,
-	"ACTIVE": 	1,
-	"WARNING": 	2,
-	"ERROR": 	3
-};
+// var DEVICE_STATE = {
+// 	"IDLE": 	0,
+// 	"ACTIVE": 	1,
+// 	"WARNING": 	2,
+// 	"ERROR": 	3
+// };
 
 var PLAYER_STATE = {
+	"BUFFERING" : "BUFFERING", 
 	"IDLE" 		: "IDLE", 
-	"LOADING" 	: "LOADING", 
-	"LOADED" 	: "LOADED", 
-	"PLAYING" 	: "PLAYING",
-	"PAUSED" 	: "PAUSED",
-	"STOPPED" 	: "STOPPED",
-	"SEEKING" 	: "SEEKING",
-	"ERROR" 	: "ERROR"
+	"PAUSED" 	: "PAUSED", 
+	"PLAYING" 	: "PLAYING"
 };
-
 
 
 
@@ -50,7 +45,10 @@ angular.module('codycast', [
 	$scope.pageState = {
 		selected: false,
 		title: "CODYCAST",
-		device: ""
+		device: "",
+		isSeeking: false,
+		currentTime: null,
+		isCounting: false
 	};
 
 	$scope.queue = {
@@ -93,7 +91,7 @@ angular.module('codycast', [
 		$scope.pageState.selected = true;
 		$scope.pageState.title = video.name.split(".mp4")[0];
 		$scope.cast.currentURL = $scope.cast.baseURL + video.name;
-		console.log("Playing video: " + video);
+		console.log(video);
 
 		this.handleQueueVideo(video.name);
 
@@ -135,9 +133,10 @@ angular.module('codycast', [
 	};
 
 	$scope.sessionListener = function(e) {
-		console.log("Setting up session.");
-
 		$scope.cast.session = e;
+		$scope.cast.session.addUpdateListener($scope.sessionUpdateListener.bind(this));
+		$scope.pageState.device = $scope.cast.session.receiver.friendlyName;
+
 		if ($scope.cast.session.media.length != 0) {
 			$scope.pageState.selected = true;
 			for (m in $scope.cast.session.media) {
@@ -148,15 +147,46 @@ angular.module('codycast', [
 					// this is the one that's currently playing
 					$scope.cast.playerState = video.playerState;
 					$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
+					$scope.pageState.currentTime = video.currentTime;
+					video.addUpdateListener($scope.onMediaStatusUpdate);
 				}
 			}
 
 			var text = "Found " + $scope.cast.session.media.length + $scope.plurality($scope.cast.session.media.length, " video.", " videos.");
 			console.log(text);
-
-			$scope.$apply();
 		}
+
+		$scope.timerInterval();
+		$scope.$apply();
 	};
+
+	$scope.sessionUpdateListener = function(isAlive) {
+		var message = isAlive ? "Session updated." : "Session removed." ;
+		console.log(message);
+		if (!isAlive) {
+			$scope.cast.session = null;
+		}
+
+		$scope.$apply();
+	}
+
+	$scope.onMediaStatusUpdate = function(isAlive) {
+		debugger;
+		console.log("Updated media.");
+		if (!$scope.pageState.isSeeking) {
+			for (m in $scope.cast.session.media) {
+				var video = $scope.cast.session.media[m];
+				if ($scope.isCurrentVideo(video.playerState)) {
+					$scope.pageState.currentTime = video.currentTime;
+					$scope.cast.playerState = video.playerState;
+					break;
+				}
+			}
+		}
+		$scope.timerInterval();
+
+		$scope.$apply();
+	}
 
 	$scope.receiverListener = function(e) {
 		if (e === "available") {
@@ -178,6 +208,8 @@ angular.module('codycast', [
 	$scope.onRequestSessionSuccess = function(e) {
         console.log("Successfully created session: " + e.sessionId);
         $scope.cast.session = e;
+        $scope.pageState.device = $scope.cast.session.receiver.friendlyName;
+        $scope.$apply();
         $scope.loadMedia();
 	};
 
@@ -187,37 +219,6 @@ angular.module('codycast', [
 
 	
 // media stuff
-
-	$scope.playPause = function() {
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				if ($scope.cast.playerState === PLAYER_STATE.PLAYING) {
-					// send pause request
-					video.pause(video.PauseRequest,
-						$scope.onInteractionSuccess("Paused video.", PLAYER_STATE.PAUSED),
-						$scope.onInteractionError);
-					break;
-				}
-				else if ($scope.cast.playerState === PLAYER_STATE.PAUSED) {
-					// send play request
-					video.play(video.PlayRequest,
-						$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
-						$scope.onInteractionError);
-					break;
-				}
-			}
-		}
-	}
-
-	$scope.stop = function() {
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				video.stop($scope.cast.session.media)
-			}
-		}
-	}
 
 	$scope.loadMedia = function() {
 		if (!$scope.cast.session) {
@@ -233,6 +234,35 @@ angular.module('codycast', [
 		request.autoplay = true;
 
 		$scope.cast.session.loadMedia(request, $scope.onLoadSuccess, $scope.onLoadError);
+	}
+
+	$scope.onLoadSuccess = function() {
+		$scope.cast.session.addUpdateListener($scope.sessionUpdateListener.bind(this));
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			if ($scope.isCurrentVideo(video.playerState)) {
+				video.addUpdateListener($scope.onMediaStatusUpdate);
+			}
+		}
+
+		// $scope.cast.playerState = PLAYER_STATE.PLAYING;
+		// $scope.pageState.currentTime = 0.00001;
+		// $scope.$apply();
+		
+		// don't need this - chromecast auto updates when a new video begins playing
+		// $scope.timerInterval();
+
+		console.log("Successfully loaded video.");	
+	}
+
+	$scope.onLoadError = function(e) {
+		$scope.pageState.selected = false;
+		$scope.pageState.title = "CODYCAST";
+		$scope.$apply();
+
+		console.log("Failed to send media to Chromecast.");
+		console.log(e);
+		alert("The Chromecast couldn't find the video you wanted to play!\n\nBe sure to select a file from the {server}/codycast/media directory!");
 	}
 
 // 	$scope.queueMedia = function(URL) {
@@ -252,19 +282,113 @@ angular.module('codycast', [
 // 		$scope.cast.session.loadMedia(request, $scope.onLoadSuccess, $scope.onLoadError);
 // 	}
 
-	$scope.onLoadSuccess = function() {
-		$scope.cast.playerState = PLAYER_STATE.PLAYING;
-		console.log("Successfully loaded video.");
+
+// button/interaction stuff
+
+	$scope.playPause = function() {
+		debugger;
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			if ($scope.isCurrentVideo(video.playerState)) {
+				if ($scope.cast.playerState === PLAYER_STATE.PLAYING) {
+					// send pause request
+					video.pause(video.PauseRequest,
+						$scope.onInteractionSuccess("Paused video.", PLAYER_STATE.PAUSED),
+						$scope.onInteractionError);
+					break;
+				}
+				else if ($scope.cast.playerState === PLAYER_STATE.PAUSED) {
+					// send play request
+					video.play(video.PlayRequest,
+						$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
+						$scope.onInteractionError);
+					break;
+				}
+				// // reach this state from STOP button
+				// else if ($scope.cast.playerState === PLAYER_STATE.IDLE && $scope.pageState.selected) {
+				// 	// TODO: play video at current spot in queue
+				// 	video.play(video.PlayRequest,
+				// 		$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
+				// 		$scope.onInteractionError);
+				// 	break;
+				// }
+			}
+		}
 	}
 
-	$scope.onLoadError = function(e) {
+	// $scope.stop = function() {
+	// 	for (m in $scope.cast.session.media) {
+	// 		var video = $scope.cast.session.media[m];
+	// 		if ($scope.isCurrentVideo(video.playerState)) {
+	// 			$scope.cast.session.stop($scope.onStopSuccess, $scope.onInteractionError);
+	// 		}
+	// 	}
+	// }
+
+	// $scope.onStopSuccess = function() {
+	// 	$scope.pageState.title = "CODYCAST";
+	// 	$scope.cast.playerState = PLAYER_STATE.IDLE;
+	// 	$scope.$apply();
+	// 	console.log("Stopped playback.");
+	// }
+
+	$scope.jumpForward = function(sec) {
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			if ($scope.isCurrentVideo(video.playerState)) {
+				var currentTime = $scope.pageState.currentTime;
+				var newTime = currentTime + sec;
+				var maxTime = video.media.duration;
+				newTime = ( (maxTime <= newTime) ? maxTime : newTime );
+
+				var seekRequest = new chrome.cast.media.SeekRequest();
+				seekRequest.currentTime = newTime;
+				video.seek(seekRequest,
+					$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
+					$scope.onInteractionError);
+
+				break;
+			}
+		}
+	}
+
+	$scope.jumpBack = function(sec) {
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			if ($scope.isCurrentVideo(video.playerState)) {
+				var currentTime = $scope.pageState.currentTime;
+				var newTime = currentTime - sec;
+				newTime = ( (newTime < 0) ? 0 : newTime );
+
+				var seekRequest = new chrome.cast.media.SeekRequest();
+				seekRequest.currentTime = newTime;
+				video.seek(seekRequest,
+					$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
+					$scope.onInteractionError);
+
+				break;
+			}
+		}
+	}
+
+	$scope.seekMedia = function() {
+debugger;
+
+	}
+
+	$scope.disconnect = function() {
+		$scope.cast.session.stop($scope.onDisconnectSuccess, $scope.onInteractionError);
+	}
+
+	$scope.onDisconnectSuccess = function() {
 		$scope.pageState.selected = false;
 		$scope.pageState.title = "CODYCAST";
+		$scope.pageState.device = "";
+		$scope.pageState.currentTime = null;
+		$scope.queue.files = [];
+		$scope.cast.playerState = PLAYER_STATE.IDLE;
 		$scope.$apply();
-
-		console.log("Failed to send media to Chromecast.");
-		console.log(e);
-		alert("The Chromecast couldn't find the video you wanted to play!\n\nBe sure to select a file from the {server}/codycast/media directory!");
+		console.log("Disconnected.");
 	}
 
 	$scope.onInteractionSuccess = function(str, STATE) {
@@ -289,7 +413,7 @@ angular.module('codycast', [
 				return true;
 			case PLAYER_STATE.PAUSED:
 				return true;
-			case PLAYER_STATE.SEEKING:
+			case PLAYER_STATE.BUFFERING:
 				return true;
 			default:
 				return false;
@@ -300,6 +424,39 @@ angular.module('codycast', [
 		var title = $scope.cast.session.media[m].media.contentId.split("/");
 		title = title[title.length-1].split(".mp4")[0];
 		return title;
+	}
+
+	$scope.timerInterval = function() {
+		if ($scope.pageState.isCounting) return;
+		$scope.pageState.isCounting = true;
+		var incrementTimerInterval = setInterval(function(){
+	        if ($scope.cast.playerState != PLAYER_STATE.PLAYING || !$scope.pageState.currentTime) {
+	            // console.log('Do not increment timer.');
+	            $scope.pageState.isCounting = false;
+	            clearInterval(incrementTimerInterval);
+	        } 
+	        else {
+	            $scope.pageState.currentTime += 1;
+	            $scope.$apply();
+	        }
+		}, 1000);
+	}
+
+	$scope.humanReadableTime = function(sec) {
+		var hours = Math.floor(sec/3600);
+		hours = (hours < 10) ? "0" + hours + ":" : hours + ":" ;
+
+		sec = sec % 3600;
+
+		var minutes = Math.floor(sec/60);
+		minutes = (minutes < 10) ? "0" + minutes + ":" : minutes + ":" ;
+
+		sec = sec % 60;
+
+		var seconds = Math.round(sec);
+		seconds = (seconds < 10) ? "0" + seconds : seconds ;
+
+		return hours+minutes+seconds;
 	}
 
 });
