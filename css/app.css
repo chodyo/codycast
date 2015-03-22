@@ -1,10 +1,28 @@
 body {
-	background-color: #153;
+	/*background-color: #153;*/
+	background-color: #375;
 	color: #ccc;
 	font-family: 'Slabo 27px', serif;
+	overflow: hidden;
 }
 
-#select-file-container, #title {
+#menu-disconnect {
+	font-size: 150%;
+}
+
+div #menu {
+	position: absolute;
+	top: .7em;
+	left: 1em;
+}
+
+div #disconnect {
+	position: absolute;
+	top: .7em;
+	right: 1em;
+}
+
+#select-file-container, #title, #playback-buttons, #status {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -30,7 +48,26 @@ span.glyphicon-play-circle {
 	top: 0.01em;
 }
 
-#title, h1 {
+#title, h1, h2{
 	top: 20%;
 	font-size: 60px;
+}
+
+#queue {
+	text-align: right;
+	position: absolute;
+	right: 5%;
+	top: 30%;
+}
+
+#playback-buttons {
+	top: 80%;
+}
+
+#playback-buttons .col-xs-4 {
+	font-size: 200%;
+}
+
+#status {
+	top: 90%;
 }

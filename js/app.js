@@ -177,7 +177,6 @@ angular.module('codycast', [
 	}
 
 	$scope.onMediaStatusUpdate = function(isAlive) {
-		debugger;
 		console.log("Updated media.");
 		if (!$scope.pageState.isSeeking) {
 			for (m in $scope.cast.session.media) {
@@ -292,7 +291,6 @@ angular.module('codycast', [
 // button/interaction stuff
 
 	$scope.playPause = function() {
-		debugger;
 		for (m in $scope.cast.session.media) {
 			var video = $scope.cast.session.media[m];
 			if ($scope.isCurrentVideo(video.playerState)) {

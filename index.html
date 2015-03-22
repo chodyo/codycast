@@ -18,54 +18,55 @@
 </head>
 <body id="controller" ng-controller="pageController">
 
-		<div id="menu"><span class="glyphicon glyphicon-show-lines"></span></div>
-		<br /><br />
+		<div id="menu-disconnect">
+			<div id="menu"><span class="glyphicon glyphicon-align-justify"></span></div>
+			<div id="disconnect"  ng-if="pageState.selected" ng-click="disconnect()"><span class="glyphicon glyphicon-remove"></span></div>
+		</div>
 
-		<div id="title">
+		<div id="title" class='row' title="Made by Cody Heffner.">
 			<h1>{{pageState.title}}</h1>
-			<h2 ng-if='pageState.device !== ""'>On {{pageState.device}}</h2>
+			<h2 ng-if='pageState.device !== ""'>{{cast.playerState}} on {{pageState.device}}</h2>
 		</div>
-		<br /><br />
 
-		<!-- <div class='col-xs-3'></div> -->
-		<!-- <div class='col-xs-6'> -->
-			<div id="select-file-container" ng-if='!pageState.selected'>
-				<span class="glyphicon glyphicon-play-circle">
-				<input id="select-file" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().handlePlayVideo(this)" />
-	<!-- 			<span class="input-group-btn">
-					<button class="browse btn btn-primary" type="button"><i class="glyphicon glyphicon-play-button"></i> </button>
-				</span> -->
-			</div>
-		<!-- </div> -->
-
-		<br /><br />
-
-		<div id="playback">
-			<h4>STATUS</h4>
-			<div id="currentTime" ng-if='pageState.currentTime'>{{humanReadableTime(pageState.currentTime)}}</div>
-			<div id="currentStatus">{{cast.playerState}}</div>
-			<br>
-			<h4>BUTTONS</h4>
-			<div id="back30" ng-if='pageState.selected' ng-click="jumpBack(30)">back30</div>
-			<div id="playPause" ng-if='pageState.selected' ng-click="playPause()">
-				<button id="play" class="playPause" ng-if='cast.playerState != "PLAYING"'><span class="glyphicon glyphicon-play"></span></button>
-				<button id="pause" class="playPause" ng-if='cast.playerState === "PLAYING"'><span class="glyphicon glyphicon-pause"></span></button>
-			</div>
-			<!-- <div id="stop" ng-click="stop()" ng-if='pageState.selected'>stop</div> -->
-			<div id="forward30" ng-if='pageState.selected' ng-click="jumpForward(30)">forward30</div>
-			<div id="disconnect" ng-if='pageState.device != ""' ng-click="disconnect()">disconnect</div>
-			<div id="volume">Volume</div>
-			Time: <input id="customTime" ng-model="pageState.customTime" ng-if='pageState.selected' /> <button ng-click="seekMedia()">Go!</button>
+		<div id="select-file-container" class='row' ng-if='!pageState.selected' title="Select a video to play.">
+			<span class="glyphicon glyphicon-play-circle">
+			<input id="select-file" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().handlePlayVideo(this)" />
+<!-- 			<span class="input-group-btn">
+				<button class="browse btn btn-primary" type="button"><i class="glyphicon glyphicon-play-button"></i> </button>
+			</span> -->
 		</div>
-		<br /><br />
 
-		<div id="queue">
-			QUEUE
+		<div id="queue" class='row' ng-if="queue.files.length > 0">
+			<h3>Queue</h3>
 			<div id="queueItem" ng-repeat='video in queue.files'>
 				<!-- <div id="removeQueueItem" style="width:50px;height:50px;background-color:red;" ng-click="removeQueueItem(video.index)"></div> -->
-				{{video.index+1}}) {{video.title}}
+				<h4>{{video.index+1}}) {{video.title}}</h4>
 			</div>
 		</div>
+
+		<div id="status" class='row' ng-if='pageState.selected'>
+			<div id="currentTime" class='col-xs-2' ng-if='pageState.currentTime'>{{humanReadableTime(pageState.currentTime)}}</div>
+			<div class='col-xs-10'>
+				Time: <input id="customTime" ng-model="pageState.customTime" ng-if='pageState.selected' /> <button ng-click="seekMedia()">Go!</button>
+			</div>
+		</div>
+
+
+		<div id="volume" class='row'><span class="glyphicon glyphicon-volume-up"></span></div>
+
+		<div id="playback-buttons" class="row" ng-if='pageState.selected'>
+			<!-- <div class='emptySpace col-xs-2'></div> -->
+			<div id="back30" class='col-xs-4' ng-click="jumpBack(30)" title="Go back 30 seconds."><span class="glyphicon glyphicon-step-backward"></span></div>
+			<!-- <div class='emptySpace col-xs-2'></div> -->
+			<div id="playPause" class='col-xs-4' ng-click="playPause()">
+				<div id="play" class="playPause" ng-if='cast.playerState != "PLAYING"'><span class="glyphicon glyphicon-play"></span></div>
+				<div id="pause" class="playPause" ng-if='cast.playerState === "PLAYING"'><span class="glyphicon glyphicon-pause"></span></div>
+			</div>
+			<!-- <div class='emptySpace col-xs-2'></div> -->
+			<!-- <div id="stop" ng-click="stop()" ng-if='pageState.selected'>stop</div> -->
+			<div id="forward30" class='col-xs-4' ng-click="jumpForward(30)" title="Go forward 30 seconds."><span class="glyphicon glyphicon-step-forward"></span></div>
+		</div>
+		
 
 </body>
 </html>

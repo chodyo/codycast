@@ -37,9 +37,9 @@
 						https://github.com/googlecast/CastMediaPlayerStreamingDRM
 						http://www.reddit.com/r/Chromecast/comments/1xgte4/open_source_local_media_server_for_chromecast/
 
-<--FFMPEG IN JS-->
-	!!!					http://bgrins.github.io/videoconverter.js/
+<--FFMPEG IN JS-->		http://bgrins.github.io/videoconverter.js/
 
+<--GLYPHICONS-->		http://getbootstrap.com/components/
 
 <--NIFTY CONSOLE COMMANDS-->
 	scope				angular.element($('#controller')).scope();
