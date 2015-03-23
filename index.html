@@ -41,6 +41,22 @@
 			</div>
 		</div>
 
+
+
+		<div id="playback-buttons" class="row" ng-if='pageState.selected'>
+			<div class='emptySpace col-xs-3'></div>
+			<div id="back30" class='col-xs-2' ng-click="jumpBack(30)" title="Go back 30 seconds."><span class="glyphicon glyphicon-step-backward"></span></div>
+			<div id="playPause" class='col-xs-2' ng-click="playPause()">
+				<div id="play" class="playPause" ng-if='cast.playerState != "PLAYING"'><span class="glyphicon glyphicon-play"></span></div>
+				<div id="pause" class="playPause" ng-if='cast.playerState === "PLAYING"'><span class="glyphicon glyphicon-pause"></span></div>
+			</div>
+			<!-- <div id="stop" ng-click="stop()" ng-if='pageState.selected'>stop</div> -->
+			<div id="forward30" class='col-xs-2' ng-click="jumpForward(30)" title="Go forward 30 seconds."><span class="glyphicon glyphicon-step-forward"></span></div>
+			<div class='emptySpace col-xs-3'></div>
+		</div>
+
+
+
 		<div id="status" class='row' ng-if='pageState.selected && pageState.currentTime'>
 			<div id="currentTime" class='col-xs-2'>{{humanReadableTime(pageState.currentTime)}}</div>
 			<input type="range" class='col-xs-8' min='0' value='{{pageState.currentTime}}' max='{{cast.session.media[cast.currentMediaIndex].media.duration}}' ng-mousedown='seeking()' ng-mouseup='seekMediaByBar()' ng-model='pageState.currentTime'>
@@ -48,25 +64,15 @@
 			<div id="maxTime" class='col-xs-2'>{{humanReadableTime(cast.session.media[cast.currentMediaIndex].media.duration)}}</div>
 		</div>
 
-<!-- 		<div class='col-xs-10'>
-			Time: <input id="customTime" ng-model="pageState.customTime" ng-if='pageState.selected' /> <button ng-click="seekMediaByTime()">Go!</button>
-		</div> -->
 
 		<div id="volume" class='row'><span class="glyphicon glyphicon-volume-up"></span></div>
 
-		<div id="playback-buttons" class="row" ng-if='pageState.selected'>
-			<!-- <div class='emptySpace col-xs-2'></div> -->
-			<div id="back30" class='col-xs-4' ng-click="jumpBack(30)" title="Go back 30 seconds."><span class="glyphicon glyphicon-step-backward"></span></div>
-			<!-- <div class='emptySpace col-xs-2'></div> -->
-			<div id="playPause" class='col-xs-4' ng-click="playPause()">
-				<div id="play" class="playPause" ng-if='cast.playerState != "PLAYING"'><span class="glyphicon glyphicon-play"></span></div>
-				<div id="pause" class="playPause" ng-if='cast.playerState === "PLAYING"'><span class="glyphicon glyphicon-pause"></span></div>
-			</div>
-			<!-- <div class='emptySpace col-xs-2'></div> -->
-			<!-- <div id="stop" ng-click="stop()" ng-if='pageState.selected'>stop</div> -->
-			<div id="forward30" class='col-xs-4' ng-click="jumpForward(30)" title="Go forward 30 seconds."><span class="glyphicon glyphicon-step-forward"></span></div>
-		</div>
 
+
+
+<!-- 		<div class='col-xs-10'>
+			Time: <input id="customTime" ng-model="pageState.customTime" ng-if='pageState.selected' /> <button ng-click="seekMediaByTime()">Go!</button>
+		</div> -->
 
 
 </body>

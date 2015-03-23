@@ -22,7 +22,7 @@ div #disconnect {
 	right: 1em;
 }
 
-#select-file-container, #title, #playback-buttons {
+#select-file-container, #title {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -61,11 +61,22 @@ span.glyphicon-play-circle {
 }
 
 #playback-buttons {
+	position: absolute;
 	top: 80%;
+	width: 100%;
+	font-size: 175%;
 }
 
-#playback-buttons .col-xs-4 {
-	font-size: 200%;
+#playback-buttons #back30 {
+	text-align: right;
+}
+
+#playback-buttons #playPause {
+	text-align: center;
+}
+
+#playback-buttons #forward30 {
+	text-align: left;
 }
 
 #status {
@@ -86,7 +97,7 @@ input[type=range] {
 
 input[type=range]::-webkit-slider-runnable-track {
 	height: 5px;
-	background: #ddd;
+	background: #ccc;
 	border: none;
 	border-radius: 3px;
 }
