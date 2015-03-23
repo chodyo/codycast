@@ -22,7 +22,7 @@ div #disconnect {
 	right: 1em;
 }
 
-#select-file-container, #title, #playback-buttons, #status {
+#select-file-container, #title, #playback-buttons {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -69,5 +69,15 @@ span.glyphicon-play-circle {
 }
 
 #status {
+	position: absolute;
 	top: 90%;
+	width: 100%;
+}
+
+#status #currentTime {
+	text-align: right;
+}
+
+#status input {
+	width: 66.6%;
 }

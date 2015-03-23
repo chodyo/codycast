@@ -42,6 +42,9 @@
 <--GLYPHICONS-->		http://getbootstrap.com/components/
 
 <--NIFTY CONSOLE COMMANDS-->
-	scope				angular.element($('#controller')).scope();
+	scope				var scope = angular.element($('#controller')).scope();
 						angular.element($('#controller')).scope().pageState.selected = false;
 						angular.element($('#controller')).scope().$apply();
+
+<--PROGRESS TAG WITH ANGULAR-->
+						http://stackoverflow.com/questions/13717383/how-to-set-value-and-max-attributes-of-progress-tag-using-angularjs

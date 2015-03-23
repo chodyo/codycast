@@ -152,6 +152,7 @@ angular.module('codycast', [
 				if ($scope.isCurrentVideo(video.playerState)) {
 					// this is the one that's currently playing
 					$scope.cast.playerState = video.playerState;
+					$scope.cast.currentMediaIndex = m;
 					$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
 					$scope.pageState.currentTime = video.currentTime;
 					video.addUpdateListener($scope.onMediaStatusUpdate);
@@ -247,6 +248,7 @@ angular.module('codycast', [
 			var video = $scope.cast.session.media[m];
 			if ($scope.isCurrentVideo(video.playerState)) {
 				video.addUpdateListener($scope.onMediaStatusUpdate);
+				$scope.cast.currentMediaIndex = m;
 			}
 		}
 
@@ -375,24 +377,51 @@ angular.module('codycast', [
 		}
 	}
 
-	$scope.seekMedia = function() {
-// debugger;
+	$scope.seekMediaByTime = function() {
 		for (m in $scope.cast.session.media) {
 			var video = $scope.cast.session.media[m];
 			if ($scope.isCurrentVideo(video.playerState)) {
 				var newTime = parseInt($scope.pageState.customTime);
 				var maxTime = video.media.duration;
 				newTime = ( (maxTime < newTime) ? maxTime : newTime );
+				newTime = ( (0 > newTime) ? 0 : newTime );
 
 				var seekRequest = new chrome.cast.media.SeekRequest();
 				seekRequest.currentTime = newTime;
 				video.seek(seekRequest,
-					$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
+					$scope.onInteractionSuccess("Successfully performed a seek by text input to time " + $scope.humanReadableTime(newTime)),
 					$scope.onInteractionError);
 
 				break;
 			}
 		}
+	}
+
+	$scope.seeking = function() {
+		$scope.pageState.isSeeking = true;
+	}
+
+	$scope.seekMediaByBar = function() {
+		$scope.pageState.isSeeking = true;
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			if ($scope.isCurrentVideo(video.playerState)) {
+				$scope.pageState.currentTime = parseInt($scope.pageState.currentTime);
+				var newTime = $scope.pageState.currentTime;
+				var maxTime = video.media.duration;
+				newTime = ( (maxTime < newTime) ? maxTime : newTime );
+				newTime = ( (0 > newTime) ? 0 : newTime );
+
+				var seekRequest = new chrome.cast.media.SeekRequest();
+				seekRequest.currentTime = newTime;
+				video.seek(seekRequest,
+					$scope.onInteractionSuccess("Successfully performed a seek by bar to time " + $scope.humanReadableTime(newTime)),
+					$scope.onInteractionError);
+
+				break;
+			}
+		}
+		$scope.pageState.isSeeking = false;
 	}
 
 	$scope.disconnect = function() {
@@ -454,7 +483,7 @@ angular.module('codycast', [
 	            $scope.pageState.isCounting = false;
 	            clearInterval(incrementTimerInterval);
 	        } 
-	        else {
+	        else if (!$scope.pageState.isSeeking) {
 	            $scope.pageState.currentTime += 1;
 	            $scope.$apply();
 	        }
