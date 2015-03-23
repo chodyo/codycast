@@ -79,9 +79,7 @@ angular.module('codycast', [
 		// which video in my queue is being played
 		currentMediaIndex: -1,
 		// a chrome.cast.media.Media ojbect
-		currentMediaSession: null,
-		// a timer for tracking progress of media
-		timer: 0
+		currentMediaObject: null,
 	};
 
 
