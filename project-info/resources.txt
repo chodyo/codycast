@@ -42,9 +42,18 @@
 <--GLYPHICONS-->		http://getbootstrap.com/components/
 
 <--NIFTY CONSOLE COMMANDS-->
-	scope				var scope = angular.element($('#controller')).scope();
+						var scope = angular.element($('#controller')).scope();
 						angular.element($('#controller')).scope().pageState.selected = false;
 						angular.element($('#controller')).scope().$apply();
+
+						scope.cast.playerState = PLAYER_STATE.PLAYING
+						scope.cast.device = "my chromecast"
+						scope.pageState.currentTime = 42
+						scope.cast.currentMediaIndex = 0
+
+						scope.$apply()
+
+
 
 <--PROGRESS TAG WITH ANGULAR-->
 						http://stackoverflow.com/questions/13717383/how-to-set-value-and-max-attributes-of-progress-tag-using-angularjs
