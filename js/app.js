@@ -97,15 +97,36 @@ angular.module('codycast', [
 		$scope.cast.currentURL = $scope.cast.baseURL + video.name;
 		console.log(video);
 
-		this.handleQueueVideo(video.name);
-
-		$scope.$apply();
+		$scope.handleQueueVideo(video.name);
 
 		this.launchApp();
 	}
 
-	$scope.handleQueueVideo = function(t) {
-		$scope.queue.files.push({title: t.split(".mp4")[0], index: $scope.queue.files.length});
+	$scope.addQueueItem = function(element) {debugger;
+		var video = element.files[0];
+		var url = $scope.cast.baseURL + video.name;
+		element.value = '';
+		console.log(video);
+
+
+
+		$scope.handleQueueVideo(video.name);
+	}
+
+	$scope.handleQueueVideo = function(filename) {debugger;
+		var name = filename.split(".mp4")[0];
+
+		// handle duplicates
+		if ($scope.queue.files.indexOf(name) > -1) {
+			var i = 1;
+			name += ' (' + i++ + ')';
+			do {
+				name = name.slice(0, -4);
+				name += ' (' + i++ + ')';
+			} while ($scope.queue.files.indexOf(name) > -1);
+		}
+		
+		$scope.queue.files.push(name);
 		$scope.$apply();
 	};
 
@@ -150,7 +171,7 @@ angular.module('codycast', [
 				if ($scope.isCurrentVideo(video.playerState)) {
 					// this is the one that's currently playing
 					$scope.cast.playerState = video.playerState;
-					$scope.cast.currentMediaIndex = m;
+					$scope.cast.currentMediaIndex = parseInt(m);
 					$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
 					$scope.pageState.currentTime = video.currentTime;
 					video.addUpdateListener($scope.onMediaStatusUpdate);
@@ -246,7 +267,7 @@ angular.module('codycast', [
 			var video = $scope.cast.session.media[m];
 			if ($scope.isCurrentVideo(video.playerState)) {
 				video.addUpdateListener($scope.onMediaStatusUpdate);
-				$scope.cast.currentMediaIndex = m;
+				$scope.cast.currentMediaIndex = parseInt(m);
 			}
 		}
 

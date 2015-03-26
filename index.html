@@ -19,7 +19,7 @@
 <body id="controller" ng-controller="pageController">
 
 		<div id="menu-disconnect">
-			<div id="menu"><span class="glyphicon glyphicon-align-justify"></span></div>
+			<!-- <div id="menu"><span class="glyphicon glyphicon-align-justify"></span></div> -->
 			<div id="disconnect"  ng-if="pageState.selected" ng-click="disconnect()"><span class="glyphicon glyphicon-remove"></span></div>
 		</div>
 
@@ -28,16 +28,28 @@
 			<h2 ng-if='pageState.device !== ""'>{{cast.playerState}} on {{pageState.device}}</h2>
 		</div>
 
+
+
+
 		<div id="select-file-container" class='row' ng-if='!pageState.selected' title="Select a video to play.">
 			<span class="glyphicon glyphicon-play-circle">
 			<input id="select-file" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().handlePlayVideo(this)" />
 		</div>
 
-		<div id="queue" class='row' ng-if="queue.files.length > 1">
-			<h3>Queue</h3>
-			<div id="queueItem" ng-repeat='video in queue.files'>
+
+
+
+		<div id="queue" ng-if="queue.files.length > 0">
+			<div class='title row'>
+				<h3 class='col-xs-9'>Queue</h3>
+				<div id="add-to-queue" class='col-xs-3' title="Select video to play after the current one.">
+					<span class="glyphicon glyphicon-plus"></span>
+					<input id="select-another-file" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().addQueueItem(this)" />
+				</div>
+			</div>
+			<div id="queue-item" class='row' ng-class="{active : $index === cast.currentMediaIndex}" ng-if="queue.files.length > 0" ng-repeat='title in queue.files'>
 				<!-- <div id="removeQueueItem" style="width:50px;height:50px;background-color:red;" ng-click="removeQueueItem(video.index)"></div> -->
-				<h4>{{video.index+1}}) {{video.title}}</h4>
+				<h4 ng-if="$index < 10">{{$index+1}}) {{title}}</h4>
 			</div>
 		</div>
 
