@@ -170,6 +170,7 @@ angular.module('codycast', [
 				$scope.handleQueueVideo(video.media.contentId.replace($scope.cast.baseURL, ""));
 				if ($scope.isCurrentVideo(video.playerState)) {
 					// this is the one that's currently playing
+					$scope.cast.currentMediaObject = video;
 					$scope.cast.playerState = video.playerState;
 					$scope.cast.currentMediaIndex = parseInt(m);
 					$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
@@ -267,6 +268,7 @@ angular.module('codycast', [
 			var video = $scope.cast.session.media[m];
 			if ($scope.isCurrentVideo(video.playerState)) {
 				video.addUpdateListener($scope.onMediaStatusUpdate);
+				$scope.cast.currentMediaObject = video;
 				$scope.cast.currentMediaIndex = parseInt(m);
 			}
 		}
@@ -312,42 +314,30 @@ angular.module('codycast', [
 // button/interaction stuff
 
 	$scope.playPause = function() {
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				if ($scope.cast.playerState === PLAYER_STATE.PLAYING) {
-					// send pause request
-					video.pause(video.PauseRequest,
-						$scope.onInteractionSuccess("Paused video.", PLAYER_STATE.PAUSED),
-						$scope.onInteractionError);
-					break;
-				}
-				else if ($scope.cast.playerState === PLAYER_STATE.PAUSED) {
-					// send play request
-					video.play(video.PlayRequest,
-						$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
-						$scope.onInteractionError);
-					break;
-				}
-				// // reach this state from STOP button
-				// else if ($scope.cast.playerState === PLAYER_STATE.IDLE && $scope.pageState.selected) {
-				// 	// TODO: play video at current spot in queue
-				// 	video.play(video.PlayRequest,
-				// 		$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
-				// 		$scope.onInteractionError);
-				// 	break;
-				// }
-			}
+		var video = $scope.cast.currentMediaObject;
+		if ($scope.cast.playerState === PLAYER_STATE.PLAYING) {
+			// send pause request
+			video.pause(video.PauseRequest,
+				$scope.onInteractionSuccess("Paused video.", PLAYER_STATE.PAUSED),
+				$scope.onInteractionError);
 		}
+		else if ($scope.cast.playerState === PLAYER_STATE.PAUSED) {
+			// send play request
+			video.play(video.PlayRequest,
+				$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
+				$scope.onInteractionError);
+		}
+		// // reach this state from STOP button
+		// else if ($scope.cast.playerState === PLAYER_STATE.IDLE && $scope.pageState.selected) {
+		// 	// TODO: play video at current spot in queue
+		// 	video.play(video.PlayRequest,
+		// 		$scope.onInteractionSuccess("Playing video.", PLAYER_STATE.PLAYING),
+		// 		$scope.onInteractionError);
+		// }
 	}
 
 	// $scope.stop = function() {
-	// 	for (m in $scope.cast.session.media) {
-	// 		var video = $scope.cast.session.media[m];
-	// 		if ($scope.isCurrentVideo(video.playerState)) {
-	// 			$scope.cast.session.stop($scope.onStopSuccess, $scope.onInteractionError);
-	// 		}
-	// 	}
+	// 	$scope.cast.session.stop($scope.onStopSuccess, $scope.onInteractionError);
 	// }
 
 	// $scope.onStopSuccess = function() {
@@ -358,62 +348,30 @@ angular.module('codycast', [
 	// }
 
 	$scope.jumpForward = function(sec) {
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				var currentTime = $scope.pageState.currentTime;
-				var newTime = currentTime + sec;
-				var maxTime = video.media.duration;
-				newTime = ( (maxTime < newTime) ? maxTime : newTime );
+		var video = $scope.cast.currentMediaObject;
+		var currentTime = $scope.pageState.currentTime;
+		var newTime = currentTime + sec;
+		var maxTime = video.media.duration;
+		newTime = ( (maxTime < newTime) ? maxTime : newTime );
 
-				var seekRequest = new chrome.cast.media.SeekRequest();
-				seekRequest.currentTime = newTime;
-				video.seek(seekRequest,
-					$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
-					$scope.onInteractionError);
-
-				break;
-			}
-		}
+		var seekRequest = new chrome.cast.media.SeekRequest();
+		seekRequest.currentTime = newTime;
+		video.seek(seekRequest,
+			$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
+			$scope.onInteractionError);
 	}
 
 	$scope.jumpBack = function(sec) {
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				var currentTime = $scope.pageState.currentTime;
-				var newTime = currentTime - sec;
-				newTime = ( (newTime < 0) ? 0 : newTime );
+		var video = $scope.cast.currentMediaObject;
+		var currentTime = $scope.pageState.currentTime;
+		var newTime = currentTime - sec;
+		newTime = ( (newTime < 0) ? 0 : newTime );
 
-				var seekRequest = new chrome.cast.media.SeekRequest();
-				seekRequest.currentTime = newTime;
-				video.seek(seekRequest,
-					$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
-					$scope.onInteractionError);
-
-				break;
-			}
-		}
-	}
-
-	$scope.seekMediaByTime = function() {
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				var newTime = parseInt($scope.pageState.customTime);
-				var maxTime = video.media.duration;
-				newTime = ( (maxTime < newTime) ? maxTime : newTime );
-				newTime = ( (0 > newTime) ? 0 : newTime );
-
-				var seekRequest = new chrome.cast.media.SeekRequest();
-				seekRequest.currentTime = newTime;
-				video.seek(seekRequest,
-					$scope.onInteractionSuccess("Successfully performed a seek by text input to time " + $scope.humanReadableTime(newTime)),
-					$scope.onInteractionError);
-
-				break;
-			}
-		}
+		var seekRequest = new chrome.cast.media.SeekRequest();
+		seekRequest.currentTime = newTime;
+		video.seek(seekRequest,
+			$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
+			$scope.onInteractionError);
 	}
 
 	$scope.seeking = function() {
@@ -422,24 +380,19 @@ angular.module('codycast', [
 
 	$scope.seekMediaByBar = function() {
 		$scope.pageState.isSeeking = true;
-		for (m in $scope.cast.session.media) {
-			var video = $scope.cast.session.media[m];
-			if ($scope.isCurrentVideo(video.playerState)) {
-				$scope.pageState.currentTime = parseInt($scope.pageState.currentTime);
-				var newTime = $scope.pageState.currentTime;
-				var maxTime = video.media.duration;
-				newTime = ( (maxTime < newTime) ? maxTime : newTime );
-				newTime = ( (0 > newTime) ? 0 : newTime );
+		var video = $scope.cast.currentMediaObject;
+		$scope.pageState.currentTime = parseInt($scope.pageState.currentTime);
+		var newTime = $scope.pageState.currentTime;
+		var maxTime = video.media.duration;
+		newTime = ( (maxTime < newTime) ? maxTime : newTime );
+		newTime = ( (0 > newTime) ? 0 : newTime );
 
-				var seekRequest = new chrome.cast.media.SeekRequest();
-				seekRequest.currentTime = newTime;
-				video.seek(seekRequest,
-					$scope.onInteractionSuccess("Successfully performed a seek by bar to time " + $scope.humanReadableTime(newTime)),
-					$scope.onInteractionError);
+		var seekRequest = new chrome.cast.media.SeekRequest();
+		seekRequest.currentTime = newTime;
+		video.seek(seekRequest,
+			$scope.onInteractionSuccess("Successfully performed a seek by bar to time " + $scope.humanReadableTime(newTime)),
+			$scope.onInteractionError);
 
-				break;
-			}
-		}
 		$scope.pageState.isSeeking = false;
 	}
 
