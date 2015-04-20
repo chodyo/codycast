@@ -50,7 +50,7 @@ angular.module('codycast', [
 	$scope.pageState = {
 		selected: false,
 		title: "CODYCAST",
-		device: "",
+		device: null,
 		isSeeking: false,
 		currentTime: null,
 		isCounting: false,
@@ -102,18 +102,18 @@ angular.module('codycast', [
 		this.launchApp();
 	}
 
-	$scope.addQueueItem = function(element) {debugger;
+	$scope.addQueueItem = function(element) {
 		var video = element.files[0];
-		var url = $scope.cast.baseURL + video.name;
-		element.value = '';
+		$scope.cast.currentURL = $scope.cast.baseURL + video.name;
+		element.value = null;
 		console.log(video);
 
-
+		$scope.loadMedia(false);
 
 		$scope.handleQueueVideo(video.name);
 	}
 
-	$scope.handleQueueVideo = function(filename) {debugger;
+	$scope.handleQueueVideo = function(filename) {
 		var name = filename.split(".mp4")[0];
 
 		// handle duplicates
@@ -164,20 +164,7 @@ angular.module('codycast', [
 
 		if ($scope.cast.session.media.length != 0) {
 			$scope.pageState.selected = true;
-			for (m in $scope.cast.session.media) {
-				// add chromecast queued videos to angular queue
-				var video = $scope.cast.session.media[m];
-				$scope.handleQueueVideo(video.media.contentId.replace($scope.cast.baseURL, ""));
-				if ($scope.isCurrentVideo(video.playerState)) {
-					// this is the one that's currently playing
-					$scope.cast.currentMediaObject = video;
-					$scope.cast.playerState = video.playerState;
-					$scope.cast.currentMediaIndex = parseInt(m);
-					$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
-					$scope.pageState.currentTime = video.currentTime;
-					video.addUpdateListener($scope.onMediaStatusUpdate);
-				}
-			}
+			$scope.updateCurrentSession();
 
 			var text = "Found " + $scope.cast.session.media.length + $scope.plurality($scope.cast.session.media.length, " video.", " videos.");
 			console.log(text);
@@ -193,22 +180,15 @@ angular.module('codycast', [
 		if (!isAlive) {
 			$scope.cast.session = null;
 		}
-
+		$scope.updateCurrentSession();
 		$scope.$apply();
 	}
 
 	$scope.onMediaStatusUpdate = function(isAlive) {
 		console.log("Updated media.");
-		if (!$scope.pageState.isSeeking) {
-			for (m in $scope.cast.session.media) {
-				var video = $scope.cast.session.media[m];
-				if ($scope.isCurrentVideo(video.playerState)) {
-					$scope.pageState.currentTime = video.currentTime;
-					$scope.cast.playerState = video.playerState;
-					break;
-				}
-			}
-		}
+		// if (!$scope.pageState.isSeeking) {
+			$scope.updateCurrentMedia();
+		// }
 		$scope.timerInterval();
 
 		$scope.$apply();
@@ -246,7 +226,7 @@ angular.module('codycast', [
 	
 // media stuff
 
-	$scope.loadMedia = function() {
+	$scope.loadMedia = function(autoplay) {
 		if (!$scope.cast.session) {
 			console.log("No session.");
 			return;
@@ -257,7 +237,7 @@ angular.module('codycast', [
 		mediaInfo.contentType = 'video/mp4';
 
 		var request = new chrome.cast.media.LoadRequest(mediaInfo);
-		request.autoplay = true;
+		request.autoplay = autoplay;
 
 		$scope.cast.session.loadMedia(request, $scope.onLoadSuccess, $scope.onLoadError);
 	}
@@ -347,45 +327,15 @@ angular.module('codycast', [
 	// 	console.log("Stopped playback.");
 	// }
 
-	$scope.jumpForward = function(sec) {
+	$scope.seek = function(sec) {
 		var video = $scope.cast.currentMediaObject;
-		var currentTime = $scope.pageState.currentTime;
-		var newTime = currentTime + sec;
+		// var currentTime = $scope.pageState.currentTime;
+		// var newTime = parseInt(currentTime) + parseInt(sec);
+		var newTime = parseInt(sec);
+		var minTime = 0;
 		var maxTime = video.media.duration;
 		newTime = ( (maxTime < newTime) ? maxTime : newTime );
-
-		var seekRequest = new chrome.cast.media.SeekRequest();
-		seekRequest.currentTime = newTime;
-		video.seek(seekRequest,
-			$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
-			$scope.onInteractionError);
-	}
-
-	$scope.jumpBack = function(sec) {
-		var video = $scope.cast.currentMediaObject;
-		var currentTime = $scope.pageState.currentTime;
-		var newTime = currentTime - sec;
-		newTime = ( (newTime < 0) ? 0 : newTime );
-
-		var seekRequest = new chrome.cast.media.SeekRequest();
-		seekRequest.currentTime = newTime;
-		video.seek(seekRequest,
-			$scope.onInteractionSuccess("Successfully performed a seek to time " + $scope.humanReadableTime(newTime)),
-			$scope.onInteractionError);
-	}
-
-	$scope.seeking = function() {
-		$scope.pageState.isSeeking = true;
-	}
-
-	$scope.seekMediaByBar = function() {
-		$scope.pageState.isSeeking = true;
-		var video = $scope.cast.currentMediaObject;
-		$scope.pageState.currentTime = parseInt($scope.pageState.currentTime);
-		var newTime = $scope.pageState.currentTime;
-		var maxTime = video.media.duration;
-		newTime = ( (maxTime < newTime) ? maxTime : newTime );
-		newTime = ( (0 > newTime) ? 0 : newTime );
+		newTime = ( (minTime > newTime) ? minTime : newTime );
 
 		var seekRequest = new chrome.cast.media.SeekRequest();
 		seekRequest.currentTime = newTime;
@@ -396,6 +346,10 @@ angular.module('codycast', [
 		$scope.pageState.isSeeking = false;
 	}
 
+	$scope.seeking = function() {
+		$scope.pageState.isSeeking = true;
+	}
+
 	$scope.disconnect = function() {
 		$scope.cast.session.stop($scope.onDisconnectSuccess, $scope.onInteractionError);
 	}
@@ -403,7 +357,7 @@ angular.module('codycast', [
 	$scope.onDisconnectSuccess = function() {
 		$scope.pageState.selected = false;
 		$scope.pageState.title = "CODYCAST";
-		$scope.pageState.device = "";
+		$scope.pageState.device = null;
 		$scope.pageState.currentTime = null;
 		$scope.queue.files = [];
 		$scope.cast.playerState = PLAYER_STATE.IDLE;
@@ -425,6 +379,45 @@ angular.module('codycast', [
 
 	$scope.plurality = function(count, singular, plural) {
 		return (count == 1) ? singular : plural ;
+	}
+
+	$scope.updateCurrentMedia = function() {
+		var video = $scope.cast.currentMediaObject;
+		$scope.cast.playerState = video.playerState;
+		if (video.playerState === PLAYER_STATE.IDLE) {
+			$scope.pageState.currentTime = null;
+			$scope.pageState.title = "CODYCAST";
+		}
+		else {
+			$scope.pageState.currentTime = video.currentTime;			
+			$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
+		}
+		video.addUpdateListener($scope.onMediaStatusUpdate);
+	}
+
+	$scope.updateCurrentSession = function() {
+		$scope.queue.files = [];
+		if (!$scope.cast.session) return;
+		for (m in $scope.cast.session.media) {
+			var video = $scope.cast.session.media[m];
+			// add chromecast queued videos to angular queue
+			$scope.handleQueueVideo(video.media.contentId.replace($scope.cast.baseURL, ""));
+			if ($scope.isCurrentVideo(video.playerState)) {
+				$scope.cast.currentMediaObject = video;
+				$scope.cast.playerState = video.playerState;
+				$scope.cast.currentMediaIndex = parseInt(m);
+				$scope.pageState.title = $scope.getTitleFromURL(video.media.contentId);
+				$scope.pageState.currentTime = video.currentTime;
+				video.addUpdateListener($scope.onMediaStatusUpdate);
+			}
+			else if (video.playerState === PLAYER_STATE.IDLE) {
+				$scope.cast.currentMediaObject = null;
+				$scope.cast.playerState = video.playerState;
+				$scope.cast.currentMediaIndex = -1;
+				$scope.pageState.title = "CODYCAST";
+				$scope.pageState.currentTime = null;
+			}
+		}
 	}
 
 	$scope.isCurrentVideo = function(state) {
@@ -463,6 +456,8 @@ angular.module('codycast', [
 	}
 
 	$scope.humanReadableTime = function(sec) {
+		if (!sec) return null;
+
 		var hours = Math.floor(sec/3600);
 		hours = (hours < 10) ? "0" + hours + ":" : hours + ":" ;
 

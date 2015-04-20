@@ -62,6 +62,10 @@ span.glyphicon-play-circle {
 	top: 30%;
 }
 
+#queue .title.row {
+	min-width: 15em;
+}
+
 #queue h3 {
 	text-align: left;
 }
