@@ -15,10 +15,10 @@ $(document).ready(function(){
 	}, 1000);
 });
 
-$(document).on("click", ".select", function() {
-	var file = $(this).parent().parent().find(".file");
-	file.trigger("click");
-});
+// $(document).on("click", ".select", function() {
+// 	var file = $(this).parent().parent().find(".file");
+// 	file.trigger("click");
+// });
 
 
 
