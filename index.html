@@ -20,12 +20,12 @@
 
 		<div id="menu-disconnect">
 			<!-- <div id="menu"><span class="glyphicon glyphicon-align-justify"></span></div> -->
-			<div id="disconnect"  ng-if="pageState.selected" ng-click="disconnect()"><span class="glyphicon glyphicon-remove"></span></div>
+			<div id="disconnect"  ng-if="cast.session" ng-click="disconnect()"><span class="glyphicon glyphicon-remove"></span></div>
 		</div>
 
 		<div id="title" class='row' title="Made by Cody Heffner.">
 			<h1>{{pageState.title}}</h1>
-			<h2 ng-if='pageState.device !== ""'>{{cast.playerState}} on {{pageState.device}}</h2>
+			<h2 ng-if='pageState.device'>{{cast.playerState}} on {{pageState.device}}</h2>
 		</div>
 
 
@@ -39,12 +39,12 @@
 
 
 
-		<div id="queue" ng-if="queue.files.length > 0">
+		<div id="queue" ng-if="pageState.selected">
 			<div class='title row'>
 				<h3 class='col-xs-9'>Queue</h3>
 				<div id="add-to-queue" class='col-xs-3' title="Select video to play after the current one.">
 					<span class="glyphicon glyphicon-plus"></span>
-					<input id="select-another-file" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().addQueueItem(this)" />
+					<!-- <input id="select-another-file" type="file" accept="video/*" ng-model="selectedVideo" onchange="angular.element(this).scope().addQueueItem(this)" /> -->
 				</div>
 			</div>
 			<div id="queue-item" class='row' ng-class="{active : $index === cast.currentMediaIndex}" ng-if="queue.files.length > 0" ng-repeat='title in queue.files'>
@@ -55,15 +55,15 @@
 
 
 
-		<div id="playback-buttons" class="row" ng-if='pageState.selected'>
+		<div id="playback-buttons" class="row" ng-if='pageState.selected && pageState.currentTime'>
 			<div class='emptySpace col-xs-3'></div>
-			<div id="back30" class='col-xs-2' ng-click="jumpBack(30)" title="Go back 30 seconds."><span class="glyphicon glyphicon-step-backward"></span></div>
+			<div id="back30" class='col-xs-2' ng-click="seek(pageState.currentTime-30)" title="Go back 30 seconds."><span class="glyphicon glyphicon-step-backward"></span></div>
 			<div id="playPause" class='col-xs-2' ng-click="playPause()">
 				<div id="play" class="playPause" ng-if='cast.playerState != "PLAYING"'><span class="glyphicon glyphicon-play"></span></div>
 				<div id="pause" class="playPause" ng-if='cast.playerState === "PLAYING"'><span class="glyphicon glyphicon-pause"></span></div>
 			</div>
 			<!-- <div id="stop" ng-click="stop()" ng-if='pageState.selected'>stop</div> -->
-			<div id="forward30" class='col-xs-2' ng-click="jumpForward(30)" title="Go forward 30 seconds."><span class="glyphicon glyphicon-step-forward"></span></div>
+			<div id="forward30" class='col-xs-2' ng-click="seek(pageState.currentTime+30)" title="Go forward 30 seconds."><span class="glyphicon glyphicon-step-forward"></span></div>
 			<div class='emptySpace col-xs-3'></div>
 		</div>
 
@@ -71,7 +71,7 @@
 
 		<div id="status" class='row' ng-if='pageState.selected && pageState.currentTime'>
 			<div id="currentTime" class='col-xs-2'>{{humanReadableTime(pageState.currentTime)}}</div>
-			<input type="range" class='col-xs-8' min='0' value='{{pageState.currentTime}}' max='{{cast.session.media[cast.currentMediaIndex].media.duration}}' ng-mousedown='seeking()' ng-mouseup='seekMediaByBar()' ng-model='pageState.currentTime'>
+			<input type="range" class='col-xs-8' min='0' value='{{pageState.currentTime}}' max='{{cast.session.media[cast.currentMediaIndex].media.duration}}' ng-mousedown='seeking()' ng-mouseup='seek(pageState.currentTime)' ng-model='pageState.currentTime'>
 			<!-- <input type="range" class='col-xs-8'> -->
 			<div id="maxTime" class='col-xs-2'>{{humanReadableTime(cast.session.media[cast.currentMediaIndex].media.duration)}}</div>
 		</div>
